@@ -33,6 +33,7 @@ type QR struct {
 	CurrentLink uint
 	UserID      uint
 	Status      bool `gorm:"default:true"`
+	Qr_type     string
 
 	Links_histories []Links_history `gorm:"foreignKey:QrId"`
 }
