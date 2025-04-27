@@ -4,7 +4,6 @@ import (
 	"backend/database"
 	utils "backend/utils"
 	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -16,7 +15,6 @@ func GetQrsByOffest(w http.ResponseWriter, r *http.Request) {
 	claims, _ := utils.VerifyJWT(authHeader)
 
 	userId := claims["userId"].(float64)
-	fmt.Println(userId)
 	queryParams := r.URL.Query()
 	offset := queryParams.Get("offset")
 	qr_type := queryParams.Get("type")
@@ -30,7 +28,6 @@ func GetQrsByOffest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid offset", http.StatusBadRequest)
 		return
 	}
-	fmt.Println(offsetUint)
 
 	var reponse Response
 
@@ -44,8 +41,6 @@ func GetQrsByOffest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	reponse.Qrs = qrs
-
-	fmt.Println("Fetched data:", qrs)
 
 	err = db.Raw("select *,qrs.id as qr_id, links.id as  link_id from (Select * from qr where user_id = ?) qrs join links on qrs.current_link = links.id", uint(userId)).Scan(&qrs).Error
 	if err != nil {

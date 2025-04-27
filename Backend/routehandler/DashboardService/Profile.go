@@ -4,7 +4,6 @@ import (
 	"backend/database"
 	utils "backend/utils"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
@@ -15,7 +14,6 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 	claims, _ := utils.VerifyJWT(authHeader)
 
 	userId := claims["userId"]
-	fmt.Println(userId)
 
 	db := database.DB
 	var user map[string]interface{}

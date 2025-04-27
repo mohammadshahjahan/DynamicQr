@@ -4,7 +4,7 @@ import (
 	Middleware "backend/middlewares"
 	DashboardService "backend/routehandler/DashboardService"
 	proxyurl "backend/routehandler/ProxyUrl"
-	QrService "backend/routehandler/QrService"
+	QrService "backend/routehandler/QRService"
 	UserService "backend/routehandler/UserService"
 
 	"github.com/gorilla/mux"
@@ -21,6 +21,7 @@ func Router() *mux.Router {
 	router.HandleFunc("/qr", Middleware.AuthMiddleWare(QrService.GetQrById)).Methods("GET")
 	router.HandleFunc("/create-qr", Middleware.AuthMiddleWare(QrService.CreateQR)).Methods("POST")
 	router.HandleFunc("/update-qr", Middleware.AuthMiddleWare(QrService.UpdateQrByID)).Methods("PUT")
+	router.HandleFunc("/auth/check", Middleware.AuthMiddleWare(UserService.CheckAuth)).Methods("GET")
 
 	return router
 }
