@@ -16,6 +16,7 @@ func GetQrById(w http.ResponseWriter, r *http.Request) {
 	claims, _ := utils.VerifyJWT(authHeader)
 
 	var history []map[string]interface{}
+	var qrDetails map[string]interface{}
 	var hasNext bool
 	userId := claims["userId"].(float64)
 	queryParams := r.URL.Query()
@@ -46,6 +47,12 @@ func GetQrById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = db.Raw("select * from (select * from qr where id = ? ) as e join links on links.id = e.current_link", qrID).Scan(&qrDetails).Error
+	if err != nil {
+		http.Error(w, "Failed to fetch QR data", http.StatusInternalServerError)
+		return
+	}
+
 	totalPages := int(math.Ceil(float64(len(history)) / float64(10)))
 	newOffset := offsetUint + 10
 
@@ -56,6 +63,7 @@ func GetQrById(w http.ResponseWriter, r *http.Request) {
 	}
 	var reponse QRHistoryResponse
 
+	reponse.Details = qrDetails
 	reponse.History = history
 	reponse.Info.HasNext = hasNext
 	reponse.Info.NewOffset = int(newOffset)
@@ -65,6 +73,7 @@ func GetQrById(w http.ResponseWriter, r *http.Request) {
 }
 
 type QRHistoryResponse struct {
+	Details map[string]interface{}   `json:"details"`
 	History []map[string]interface{} `json:"history"`
 	Info    Info                     `json:"info"`
 }

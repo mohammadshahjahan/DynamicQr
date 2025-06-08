@@ -4,6 +4,7 @@ import (
 	"backend/database"
 	utils "backend/utils"
 	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -42,23 +43,25 @@ func GetQrsByOffest(w http.ResponseWriter, r *http.Request) {
 	}
 	reponse.Qrs = qrs
 
-	err = db.Raw("select *,qrs.id as qr_id, links.id as  link_id from (Select * from qr where user_id = ?) qrs join links on qrs.current_link = links.id", uint(userId)).Scan(&qrs).Error
+	var totalRows int
+	err = db.Raw("SELECT COUNT(*) FROM qr WHERE user_id = ? AND qr_type = ?", uint(userId), qr_type).Scan(&totalRows).Error
 	if err != nil {
-		http.Error(w, "Failed to fetch QR data", http.StatusInternalServerError)
+		http.Error(w, "Failed to count QR data", http.StatusInternalServerError)
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(len(qrs)) / float64(10)))
+	totalPages := int(math.Ceil(float64(totalRows) / float64(10)))
+	fmt.Println("Total Pages: ", totalPages)
 	newOffset := offsetUint + 10
 	var hasNext bool
-	if newOffset < uint64(len(qrs)) {
+	if newOffset < uint64(totalRows) {
 		hasNext = true
 	} else {
 		hasNext = false
 	}
 	reponse.Info.HasNext = hasNext
 	reponse.Info.NewOffset = int(newOffset)
-	reponse.Info.TotalPages = totalPages
+	reponse.Info.TotalPages = int(totalPages)
 
 	json.NewEncoder(w).Encode(reponse)
 
