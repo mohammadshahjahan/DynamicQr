@@ -47,7 +47,7 @@ func GetQrById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.Raw("select * from (select * from qr where id = ? ) as e join links on links.id = e.current_link", qrID).Scan(&qrDetails).Error
+	err = db.Raw("select * from (select * from qr where id = ? and user_id = ?) as e join links on links.id = e.current_link", qrID, userId).Scan(&qrDetails).Error
 	if err != nil {
 		http.Error(w, "Failed to fetch QR data", http.StatusInternalServerError)
 		return
